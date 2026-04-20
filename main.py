@@ -1,11 +1,14 @@
 """doc-fetch – Extract raw text from documents in various formats.
 
 Usage:
-    python main.py <file_path>                  Extract a single file
-    python main.py <dir_path>                   Extract all supported files in a directory
-    python main.py <path> -o output.txt         Write result to a file
-    python main.py <path> --parse               Extract + parse into structured JSON
-    python main.py <path> --parse -o out.json   Parse and write JSON to file
+    python main.py <file_path>                      Extract a single file
+    python main.py <dir_path>                       Extract all supported files in a directory
+    python main.py <path> -o output.txt             Write result to a file
+    python main.py <path> --parse                   Extract + parse into structured JSON
+    python main.py <path> --parse -o out.json       Parse and write JSON to file
+    python main.py <path> --evaluate                Extract + TASTED六力评估 (JSON)
+    python main.py <path> --evaluate --report       Extract + TASTED六力评估 (Markdown报告)
+    python main.py <path> --evaluate -o report.md   评估结果写入文件
 """
 
 from __future__ import annotations
@@ -65,6 +68,17 @@ def main(argv: list[str] | None = None) -> None:
         help="LLM model for --parse (default from .env DEFAULT_LLM_PROVIDER).",
     )
     parser.add_argument(
+        "-e",
+        "--evaluate",
+        action="store_true",
+        help="Evaluate resume against NetEase TASTED六力 model via LLM.",
+    )
+    parser.add_argument(
+        "--report",
+        action="store_true",
+        help="With --evaluate: output a human-readable Markdown report instead of JSON.",
+    )
+    parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
@@ -116,6 +130,22 @@ def main(argv: list[str] | None = None) -> None:
         logger.info("Parsing extracted text into structured resume JSON...")
         parsed = parse_resume(output, model=args.model)
         output = json.dumps(parsed, ensure_ascii=False, indent=2)
+
+    # --evaluate: TASTED六力评估
+    if args.evaluate:
+        from parsers.tasted import evaluate_tasted, format_tasted_report
+
+        if not output.strip():
+            logger.error("No text extracted, nothing to evaluate.")
+            sys.exit(1)
+
+        logger.info("Evaluating resume against TASTED六力 model...")
+        eval_result = evaluate_tasted(output, model=args.model)
+
+        if args.report:
+            output = format_tasted_report(eval_result)
+        else:
+            output = json.dumps(eval_result, ensure_ascii=False, indent=2)
 
     if args.output:
         Path(args.output).write_text(output, encoding="utf-8")
