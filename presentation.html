@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>doc-fetch 项目介绍</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0f172a; color: #e2e8f0; overflow-x: hidden; }
+
+  /* ── Slide system ── */
+  .slide { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 60px 80px; position: relative; scroll-snap-align: start; }
+  .slide-counter { position: absolute; bottom: 30px; right: 40px; font-size: 14px; color: #64748b; }
+
+  /* ── Cover ── */
+  .cover { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); text-align: center; }
+  .cover h1 { font-size: 72px; font-weight: 800; background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; }
+  .cover .subtitle { font-size: 28px; color: #94a3b8; margin-bottom: 40px; }
+  .cover .tags { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .cover .tag { padding: 8px 20px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); border-radius: 20px; font-size: 14px; color: #38bdf8; }
+
+  /* ── Architecture slide ── */
+  .arch-slide { background: #1e293b; }
+  .arch-slide h2 { font-size: 42px; margin-bottom: 40px; color: #f1f5f9; }
+  .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+  .arch-box { background: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 30px; }
+  .arch-box h3 { font-size: 20px; color: #38bdf8; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .arch-box .icon { font-size: 28px; }
+  .arch-box ul { list-style: none; }
+  .arch-box li { padding: 6px 0; color: #94a3b8; font-size: 15px; border-bottom: 1px solid #1e293b; }
+  .arch-box li:last-child { border: none; }
+  .arch-box .highlight { color: #c084fc; font-weight: 600; }
+
+  /* ── Flow slide ── */
+  .flow-slide { background: linear-gradient(180deg, #1e293b, #0f172a); }
+  .flow-slide h2 { font-size: 42px; margin-bottom: 50px; color: #f1f5f9; text-align: center; }
+  .flow-pipeline { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; }
+  .flow-step { background: #0f172a; border: 2px solid #334155; border-radius: 16px; padding: 24px 28px; text-align: center; min-width: 180px; position: relative; }
+  .flow-step h4 { font-size: 16px; color: #38bdf8; margin-bottom: 8px; }
+  .flow-step p { font-size: 13px; color: #64748b; line-height: 1.5; }
+  .flow-step.active { border-color: #818cf8; background: rgba(129,140,248,0.1); }
+  .flow-arrow { font-size: 28px; color: #334155; padding: 0 8px; }
+  .flow-row { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 20px; }
+
+  /* ── PDF strategy ── */
+  .pdf-slide { background: #0f172a; }
+  .pdf-slide h2 { font-size: 42px; margin-bottom: 40px; color: #f1f5f9; }
+  .strategy-flow { display: flex; flex-direction: column; gap: 16px; max-width: 900px; }
+  .strat-item { display: flex; align-items: center; gap: 20px; background: #1e293b; border-radius: 12px; padding: 20px 28px; border-left: 4px solid; }
+  .strat-item:nth-child(1) { border-color: #22c55e; }
+  .strat-item:nth-child(2) { border-color: #f59e0b; }
+  .strat-item:nth-child(3) { border-color: #ef4444; }
+  .strat-item:nth-child(4) { border-color: #8b5cf6; }
+  .strat-num { font-size: 32px; font-weight: 800; min-width: 50px; }
+  .strat-item:nth-child(1) .strat-num { color: #22c55e; }
+  .strat-item:nth-child(2) .strat-num { color: #f59e0b; }
+  .strat-item:nth-child(3) .strat-num { color: #ef4444; }
+  .strat-item:nth-child(4) .strat-num { color: #8b5cf6; }
+  .strat-body h4 { font-size: 18px; color: #f1f5f9; margin-bottom: 4px; }
+  .strat-body p { font-size: 14px; color: #94a3b8; }
+
+  /* ── Resume cards ── */
+  .resume-slide { background: #1e293b; padding: 60px 40px; }
+  .resume-slide h2 { font-size: 42px; margin-bottom: 40px; color: #f1f5f9; text-align: center; }
+  .resume-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .resume-card { background: #0f172a; border: 1px solid #334155; border-radius: 16px; overflow: hidden; }
+  .resume-header { padding: 24px 28px 16px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; }
+  .resume-name { font-size: 24px; font-weight: 700; color: #f1f5f9; }
+  .resume-file { font-size: 12px; color: #64748b; background: #1e293b; padding: 4px 10px; border-radius: 6px; }
+  .resume-contact { padding: 12px 28px; display: flex; gap: 20px; font-size: 13px; color: #64748b; border-bottom: 1px solid #1e293b; flex-wrap: wrap; }
+  .resume-contact span { display: flex; align-items: center; gap: 4px; }
+  .resume-sections { padding: 16px 28px 24px; }
+  .resume-section { margin-bottom: 16px; }
+  .resume-section:last-child { margin-bottom: 0; }
+  .section-title { font-size: 13px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .section-item { background: #1e293b; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; }
+  .section-item:last-child { margin-bottom: 0; }
+  .item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .item-main { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+  .item-date { font-size: 12px; color: #64748b; white-space: nowrap; }
+  .item-sub { font-size: 13px; color: #94a3b8; }
+  .item-duty { font-size: 12px; color: #64748b; margin-top: 6px; line-height: 1.6; max-height: 60px; overflow: hidden; position: relative; }
+  .item-duty::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 24px; background: linear-gradient(transparent, #1e293b); }
+  .degree-badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: rgba(56,189,248,0.15); color: #38bdf8; }
+
+  /* ── Nav dots ── */
+  .nav { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+  .nav a { width: 10px; height: 10px; border-radius: 50%; background: #334155; display: block; transition: all .3s; }
+  .nav a.active, .nav a:hover { background: #818cf8; transform: scale(1.4); }
+
+  /* ── Scroll snap ── */
+  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+  @media (max-width: 900px) {
+    .slide { padding: 40px 24px; }
+    .cover h1 { font-size: 42px; }
+    .arch-grid, .resume-grid { grid-template-columns: 1fr; }
+    .flow-row { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav" id="nav"></nav>
+
+<!-- Slide 1: Cover -->
+<section class="slide cover" id="s1">
+  <h1>doc-fetch</h1>
+  <p class="subtitle">多格式文档提取 + 简历结构化解析</p>
+  <div class="tags">
+    <span class="tag">PDF / Word / Excel / PPT / HTML</span>
+    <span class="tag">Type3 乱码智能检测</span>
+    <span class="tag">RapidOCR 中英文混排</span>
+    <span class="tag">LangChain 结构化</span>
+  </div>
+  <div class="slide-counter">1 / 5</div>
+</section>
+
+<!-- Slide 2: Architecture -->
+<section class="slide arch-slide" id="s2">
+  <h2>系统架构</h2>
+  <div class="arch-grid">
+    <div class="arch-box">
+      <h3><span class="icon">1</span> 文本提取层 · extractors/</h3>
+      <ul>
+        <li><span class="highlight">PDFExtractor</span> — PyMuPDF + 乱码检测 + RapidOCR + Vision API</li>
+        <li><span class="highlight">DocxExtractor</span> — python-docx 段落+表格</li>
+        <li><span class="highlight">ExcelExtractor</span> — pandas 逐Sheet逐行</li>
+        <li><span class="highlight">PptxExtractor</span> — python-pptx Slide/Shape/TextFrame</li>
+        <li><span class="highlight">HTMLExtractor</span> — BeautifulSoup 标签剥离</li>
+        <li><span class="highlight">PlainTextExtractor</span> — 编码自动检测</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <h3><span class="icon">2</span> 结构化解析层 · parsers/</h3>
+      <ul>
+        <li><span class="highlight">LangChain Chain</span> — ChatPromptTemplate | ChatOpenAI | JsonOutputParser</li>
+        <li><span class="highlight">Prompt 模板</span> — prompts/llm.md 定义字段Schema</li>
+        <li><span class="highlight">.env 配置</span> — API Key / Base URL / 模型名</li>
+        <li><span class="highlight">输出</span> — resumeBase / Education / Project / WorkExp</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <h3><span class="icon">3</span> 注册表机制</h3>
+      <ul>
+        <li>策略模式 — 按扩展名分派 Extractor</li>
+        <li>15 种扩展名覆盖 — .pdf .docx .xlsx .pptx .html .txt .md .csv ...</li>
+        <li>零侵入扩展 — register(".xxx", MyExtractor()) 即可</li>
+      </ul>
+    </div>
+    <div class="arch-box">
+      <h3><span class="icon">4</span> CLI 入口 · main.py</h3>
+      <ul>
+        <li><code>python main.py file.pdf</code> — 纯文本提取</li>
+        <li><code>python main.py file.pdf --parse</code> — 结构化JSON</li>
+        <li><code>--model / -o / -v</code> — 模型/输出/调试</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-counter">2 / 5</div>
+</section>
+
+<!-- Slide 3: PDF Strategy -->
+<section class="slide pdf-slide" id="s3">
+  <h2>PDF 提取策略</h2>
+  <div class="strategy-flow">
+    <div class="strat-item">
+      <div class="strat-num">01</div>
+      <div class="strat-body">
+        <h4>PyMuPDF get_text() 嵌入文本提取</h4>
+        <p>毫秒级 / 零成本 / 覆盖所有正常文本 PDF</p>
+      </div>
+    </div>
+    <div class="strat-item">
+      <div class="strat-num">02</div>
+      <div class="strat-body">
+        <h4>_is_legible() 三层乱码检测</h4>
+        <p>页级字符比例 → 零CJK检测 → 行级乱码率 | 解决 Type3 字体 / 混合编码</p>
+      </div>
+    </div>
+    <div class="strat-item">
+      <div class="strat-num">03</div>
+      <div class="strat-body">
+        <h4>RapidOCR 光学字符识别</h4>
+        <p>基于 PaddleOCR 模型 / ONNX Runtime / 中英文混排自动识别 / 免费</p>
+      </div>
+    </div>
+    <div class="strat-item">
+      <div class="strat-num">04</div>
+      <div class="strat-body">
+        <h4>长页分片 + Vision API 兜底</h4>
+        <p>超长单页 PDF 按 2048px 切条 / GPT-4o Vision 最终兜底</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-counter">3 / 5</div>
+</section>
+
+<!-- Slide 4: Data Flow -->
+<section class="slide flow-slide" id="s4">
+  <h2>数据流</h2>
+  <div class="flow-row">
+    <div class="flow-step">
+      <h4>PDF / DOCX / XLSX ...</h4>
+      <p>多格式文档输入</p>
+    </div>
+    <span class="flow-arrow">&#10132;</span>
+    <div class="flow-step active">
+      <h4>格式检测 &amp; 分派</h4>
+      <p>注册表按扩展名<br>选择 Extractor</p>
+    </div>
+    <span class="flow-arrow">&#10132;</span>
+    <div class="flow-step">
+      <h4>文本提取</h4>
+      <p>嵌入文本 / OCR<br>乱码检测 &amp; 分片</p>
+    </div>
+    <span class="flow-arrow">&#10132;</span>
+    <div class="flow-step">
+      <h4>Raw Text</h4>
+      <p>纯文本输出</p>
+    </div>
+    <span class="flow-arrow">&#10132;</span>
+    <div class="flow-step active">
+      <h4>LangChain 解析</h4>
+      <p>Prompt + LLM<br>+ JsonOutputParser</p>
+    </div>
+    <span class="flow-arrow">&#10132;</span>
+    <div class="flow-step">
+      <h4>Structured JSON</h4>
+      <p>简历结构化数据</p>
+    </div>
+  </div>
+  <div class="slide-counter">4 / 5</div>
+</section>
+
+<!-- Slide 5: Resume Data -->
+<section class="slide resume-slide" id="s5">
+  <h2>解析结果展示</h2>
+  <div class="resume-grid" id="resumeGrid"></div>
+  <div class="slide-counter">5 / 5</div>
+</section>
+
+<script>
+// ── Resume Data (res3~res6.json) ──
+const resumes = [
+{"file":"res3.json","resumeBase":{"applicantName":"祁智霖","mobile":"18995542213","email":"qzl030205@163.com"},"resumeEducationList":[{"startDate":"2021.09","endDate":"2025.06","schoolName":"杭州电子科技大学","majorName":"计算机科学与技术","degree":"06","fullTime":1},{"startDate":"2025.09","endDate":"2026.11","schoolName":"香港大学","majorName":"电子商务与互联网计算","degree":"07","fullTime":1}],"resumeProjectList":[{"startDate":"2022.12","endDate":"2023.03","name":"基于深度学习的校园安全保障平台","description":"针对校园安全管理痛点，构建基于YOLOv7模型的智能监测系统","duty":"产品背景与目标：针对校园安全管理痛点，构建基于YOLOv7模型的智能监测系统，实时检测火灾、淹水、学生打架等安全隐患..."}],"resumeWorkExpList":[{"startDate":"2024.05","endDate":"2024.09","company":"杭州龙即信息技术有限公司","position":"AI产品实习生","duty":"需求分析与产品规划：基于市场调研、竞品分析与用户反馈，深入挖掘用户在私有化大模型部署与RAG知识库构建方面的核心诉求...","workType":1},{"startDate":"2025.01","endDate":"2025.05","company":"海康威视","position":"AI产品实习生","duty":"参与无感心理评估产品在公安领域的场景适配与版本迭代...","workType":1},{"startDate":"2025.05","endDate":"2025.09","company":"SHEIN","position":"AI产品实习生","duty":"基于Dify平台构建自动化打分Agent，采用Likert量表对8个语种共1.6万条翻译数据进行系统评估...","workType":1},{"startDate":"2025.11","endDate":"2026.03","company":"京东集团","position":"AI产品实习生","duty":"商品用户评价标签能力搭建，标签规模由2万条扩展至174万条...","workType":1}]},
+{"file":"res4.json","resumeBase":{"applicantName":"曾沁月","mobile":"19129213477","email":"1506741518@qq.com"},"resumeEducationList":[{"startDate":"2024.09","endDate":"至今","schoolName":"同济大学","majorName":"产品服务体系设计","degree":"07","fullTime":1},{"startDate":"2020.07","endDate":"2024.07","schoolName":"华南理工大学","majorName":"工业设计","degree":"06","fullTime":1}],"resumeProjectList":[{"startDate":"2025.09","endDate":"2025.12","name":"舒华体育动感单车Agent","description":"AI数字人教练+校园共享健身仓产品方案","duty":"通过用户调研分析提炼运动小白痛点，设计3组结构化prompt框架，沉淀RAG知识库..."},{"startDate":"2025.03","endDate":"2025.05","name":"支付宝学生模式日程表","description":"以日程表为切入点挖掘大学生高潜力触发场景","duty":"访谈用户定义触达场景，构建场景闭环链路，运动意愿提升40%..."}],"resumeWorkExpList":[{"startDate":"2025.09","endDate":"2026.02","company":"蚂蚁集团","position":"AI产品实习生","duty":"合同审查Agent搭建，缩短审查时长88%（3h→20min）；质保期ChatBot调优，准确性提升至98%以上...","workType":1},{"startDate":"2023.07","endDate":"2023.10","company":"兴趣岛","position":"产品实习生","duty":"转介绍功能优化，海报配置时长缩短90%...","workType":1}]},
+{"file":"res5.json","resumeBase":{"applicantName":"王若茵","mobile":"18664941106","email":"644670953@qq.com"},"resumeEducationList":[{"startDate":"","endDate":"","schoolName":"澳洲MONASH","majorName":"","degree":"06","fullTime":1}],"resumeProjectList":[{"startDate":"2023.11","endDate":"2024.01","name":"寒霜启示录 (WHITEOUT SURVIVAL)","description":"冰雪末日SLG，全球累计收入突破40亿美元","duty":"主导国内外版本全部交互设计，简化核心操作，降低SLG复杂度..."},{"startDate":"2022.10","endDate":"2023.07","name":"虚拟世界","description":"完美世界3D UGC社交游戏平台","duty":"负责横竖版功能界面、玩法体验设计..."}],"resumeWorkExpList":[{"startDate":"2023.11","endDate":"至今","company":"点点互动","position":"主交互策划","duty":"主导WHITEOUT SURVIVAL国内外版本全部交互设计，制定策划、交互、UI间协作流程...","workType":0},{"startDate":"2022.10","endDate":"2023.07","company":"完美世界","position":"高级UE策划","duty":"负责《虚拟世界》体验设计，参与捏脸、换装、时装UGC等系统设计...","workType":0},{"startDate":"2022.04","endDate":"2022.10","company":"创梦天地","position":"交互设计师","duty":"负责《女巫日记》迭代调优...","workType":0},{"startDate":"2021.09","endDate":"2022.04","company":"豹亮科技","position":"交互设计组长","duty":"带领组员参与不同项目的研发体验设计...","workType":0},{"startDate":"2018.10","endDate":"2020.12","company":"北京鲲鹏文化","position":"视觉设计","duty":"带领组员承接甲方APP、WEB、VI、物料设计...","workType":0}]},
+{"file":"res6.json","resumeBase":{"applicantName":"王沁","mobile":"13022013816","email":"secondlime@foxmail.com"},"resumeEducationList":[{"startDate":"2013.9","endDate":"2017.7","schoolName":"大连理工大学","majorName":"工业设计","degree":"06","fullTime":null},{"startDate":"2018.10","endDate":"2021.3","schoolName":"日本国立九州大学","majorName":"艺术工学府设计战略方向","degree":"07","fullTime":null}],"resumeProjectList":[{"startDate":"2024.6","endDate":"2025.5","name":"State of Survival","description":"SLG项目中后期运营(unity)","duty":"参与中后期运营活动和前中期系统优化、新系统功能设计..."},{"startDate":"2022.11","endDate":"2023.12","name":"镭闪","description":"二次元卡牌类项目研发(unity)","duty":"完成武器、英雄等核心系统交互设计与动态效果实现..."},{"startDate":"2021.5","endDate":"2022.7","name":"休闲放置类项目","description":"休闲放置类项目研发(unity)","duty":"完成20+项核心需求，涵盖武器/卡牌等养成系统..."}],"resumeWorkExpList":[{"startDate":"2024.6","endDate":"2025.5","company":"Funplus","position":"游戏交互设计师","duty":"参与State of Survival项目中后期运营活动和系统优化...","workType":0},{"startDate":"2022.11","endDate":"2023.12","company":"心光流美","position":"游戏交互设计师","duty":"参与二次元卡牌类项目研发(unity)...","workType":0},{"startDate":"2021.5","endDate":"2022.7","company":"Bilibili心源互动","position":"游戏交互设计师/UE策划","duty":"完成20+项核心需求，主导建立UE协作机制...","workType":0}]}
+];
+
+const degreeMap = {'05':'大专','06':'本科','07':'硕士','09':'MBA','10':'博士','00':'其他'};
+const workTypeMap = {0:'全职',1:'实习',2:'兼职'};
+const colors = ['#38bdf8','#818cf8','#c084fc','#22c55e'];
+
+function renderResumes() {
+  const grid = document.getElementById('resumeGrid');
+  resumes.forEach((r, idx) => {
+    const b = r.resumeBase;
+    const color = colors[idx % colors.length];
+
+    let eduHtml = (r.resumeEducationList || []).map(e =>
+      `<div class="section-item">
+        <div class="item-top">
+          <span class="item-main">${e.schoolName}</span>
+          <span class="item-date">${e.startDate || '?'} ~ ${e.endDate || '?'}</span>
+        </div>
+        <div class="item-sub">${e.majorName || ''} ${e.degree ? '<span class="degree-badge">'+degreeMap[e.degree]+'</span>' : ''}</div>
+      </div>`
+    ).join('');
+
+    let workHtml = (r.resumeWorkExpList || []).map(w =>
+      `<div class="section-item">
+        <div class="item-top">
+          <span class="item-main">${w.company} · ${w.position}</span>
+          <span class="item-date">${w.startDate} ~ ${w.endDate}</span>
+        </div>
+        <div class="item-sub">${w.workType !== null && w.workType !== undefined ? workTypeMap[w.workType] || '' : ''}</div>
+        <div class="item-duty">${w.duty || ''}</div>
+      </div>`
+    ).join('');
+
+    let projHtml = (r.resumeProjectList || []).map(p =>
+      `<div class="section-item">
+        <div class="item-top">
+          <span class="item-main">${p.name}</span>
+          <span class="item-date">${p.startDate} ~ ${p.endDate}</span>
+        </div>
+        <div class="item-sub">${p.description || ''}</div>
+      </div>`
+    ).join('');
+
+    grid.innerHTML += `
+      <div class="resume-card" style="border-top: 3px solid ${color}">
+        <div class="resume-header">
+          <span class="resume-name">${b.applicantName}</span>
+          <span class="resume-file">${r.file}</span>
+        </div>
+        <div class="resume-contact">
+          <span>${b.mobile || ''}</span>
+          <span>${b.email || ''}</span>
+        </div>
+        <div class="resume-sections">
+          <div class="resume-section">
+            <div class="section-title">Education</div>
+            ${eduHtml}
+          </div>
+          <div class="resume-section">
+            <div class="section-title">Work Experience</div>
+            ${workHtml}
+          </div>
+          ${projHtml ? `<div class="resume-section"><div class="section-title">Projects</div>${projHtml}</div>` : ''}
+        </div>
+      </div>`;
+  });
+}
+
+// ── Nav dots ──
+function setupNav() {
+  const nav = document.getElementById('nav');
+  const slides = document.querySelectorAll('.slide');
+  slides.forEach((s, i) => {
+    const a = document.createElement('a');
+    a.href = '#' + s.id;
+    if (i === 0) a.classList.add('active');
+    nav.appendChild(a);
+  });
+  const dots = nav.querySelectorAll('a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        dots.forEach(d => d.classList.remove('active'));
+        const idx = Array.from(slides).indexOf(e.target);
+        if (idx >= 0) dots[idx].classList.add('active');
+      }
+    });
+  }, { threshold: 0.5 });
+  slides.forEach(s => observer.observe(s));
+}
+
+renderResumes();
+setupNav();
+</script>
+</body>
+</html>
